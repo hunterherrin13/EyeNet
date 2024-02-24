@@ -1,10 +1,50 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.data import Dataset
+from torchvision import transforms
+import cv2
+import numpy as np
 
-class CustomCNN(nn.Module):
+class CustomDataset(Dataset):
+    def __init__(self, image_paths, labels, transform=None):
+        self.image_paths = image_paths
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        img_path = self.image_paths[idx]
+        image = cv2.imread(img_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        label = self.labels[idx]
+        
+        if self.transform:
+            image = self.transform(image)
+        
+        return image, label
+
+# Define transformations for input images
+train_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize((240, 240)),
+    # transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+val_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize((240, 240)),
+    # transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+
+class CNN(nn.Module):
     def __init__(self, num_classes):
-        super(CustomCNN, self).__init__()
+        super(CNN, self).__init__()
         # Define the convolutional layers
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)

@@ -7,7 +7,7 @@ from torchvision import transforms
 import cv2
 import numpy as np
 from Image_Loader_v101 import *
-from Model_functions_v101 import *
+from Model_Functions_v102 import *
 
 
 lr=0.01
