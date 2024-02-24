@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 import cv2
 import numpy as np
-from Model_functions import *
+from Model_functions_v101 import *
 
 
 # Initialize the CNN model
