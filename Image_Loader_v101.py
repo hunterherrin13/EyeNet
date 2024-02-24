@@ -1,4 +1,5 @@
 import os,glob
+import random
 
 path = 'C:/PROJECT_CODE/DETECTION_NET/FACES_20240224'
 
@@ -16,8 +17,18 @@ name_to_encoded = {name: i for i, name in enumerate(sorted(set(names)))}
 encoded_names = [name_to_encoded[name] for name in names]
 unique_names = list(range(len(set(names))))
 
-val_images = [train_images[0],train_images[12],train_images[24],train_images[36],train_images[48],train_images[60]]
-val_names = unique_names
+val_images = train_images
+val_names = encoded_names
 
-# print(val_images)
+combined_data = list(zip(val_images, val_names))
+
+# Shuffle the combined list in place
+random.shuffle(combined_data)
+
+# Unzip the shuffled list to get the shuffled val_images and val_names
+shuffled_val_images, shuffled_val_names = zip(*combined_data)
+
+# print(encoded_names)
+# print(train_images)
 # print(val_names)
+# print(val_images)

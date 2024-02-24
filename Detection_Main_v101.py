@@ -10,6 +10,8 @@ from Image_Loader_v101 import *
 from Model_functions_v101 import *
 
 
+lr=0.005
+
 # Initialize the CNN model
 num_classes = len(unique_names)
 model = CNNModel(num_classes)  # Example with 10 classes
@@ -19,13 +21,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr)
 # Train the model
-num_epochs = 100
+num_epochs = 10
 # best_val_loss = float('inf')
 best_model_path = 'best_model.pth'
 
-train_image_paths,train_labels = train_images,names
+train_image_paths,train_labels = train_images,encoded_names
 val_image_paths,val_labels = val_images,val_names
 
 train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
@@ -87,8 +89,7 @@ run_training()
 
 # num_classes = 10  # Example with 10 classes
 model = CNNModel(num_classes)
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
+optimizer = optim.SGD(model.parameters(), lr, momentum=0.9)
 
 checkpoint = torch.load('best_model.pth')
 model.load_state_dict(checkpoint['model_state_dict'])
@@ -97,10 +98,11 @@ epoch = checkpoint['epoch']
 loss = checkpoint['loss']
 model.eval()
 
-print(epoch)
-print(loss)
+# print(epoch)
+# print(loss)
 
-image_path = train_images[0]
+image_path = train_images[71]
+# print(train_images[40])
 image = cv2.imread(image_path)
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
 image = cv2.resize(image, (224, 224))  # Resize the image

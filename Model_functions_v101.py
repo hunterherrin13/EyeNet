@@ -30,14 +30,14 @@ class CustomDataset(Dataset):
 # Define transformations for input images
 train_transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Resize((224, 224)),
+    transforms.Resize((480, 480)),
     # transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 val_transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Resize((224, 224)),
+    transforms.Resize((480, 480)),
     # transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
@@ -104,12 +104,12 @@ class DepthwiseSeparableConv(nn.Module):
         return x
 
 
-def predict_image_class(image_path, model, transform):
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image_tensor = transform(image).unsqueeze(0)
-    with torch.no_grad():
-        model.eval()
-        prediction = model(image_tensor)
-        predicted_class = prediction.argmax(dim=1).item()
-    return predicted_class
+# def predict_image_class(image_path, model, transform):
+#     image = cv2.imread(image_path)
+#     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+#     image_tensor = transform(image).unsqueeze(0)
+#     with torch.no_grad():
+#         model.eval()
+#         prediction = model(image_tensor)
+#         predicted_class = prediction.argmax(dim=1).item()
+#     return predicted_class
