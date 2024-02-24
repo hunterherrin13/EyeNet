@@ -6,11 +6,14 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 import cv2
 import numpy as np
+from Image_Loader_v101 import *
 from Model_functions_v101 import *
 
 
 # Initialize the CNN model
-model = CNNModel(num_classes=10)  # Example with 10 classes
+num_classes = len(unique_names)
+model = CNNModel(num_classes)  # Example with 10 classes
+# model = CNNModel(num_classes=10)
 # Define device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
@@ -22,8 +25,8 @@ num_epochs = 100
 # best_val_loss = float('inf')
 best_model_path = 'best_model.pth'
 
-train_image_paths,train_labels = ['20231001_150912 - Copy.jpg'],[0]
-val_image_paths,val_labels = ['20231001_150912 - Copy.jpg'],[0]
+train_image_paths,train_labels = train_images,names
+val_image_paths,val_labels = val_images,val_names
 
 train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
 val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform)
@@ -79,10 +82,10 @@ def run_training():
 
     print('Training complete.')
 
-# run_training()
+run_training()
 
 
-num_classes = 10  # Example with 10 classes
+# num_classes = 10  # Example with 10 classes
 model = CNNModel(num_classes)
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
@@ -97,7 +100,7 @@ model.eval()
 print(epoch)
 print(loss)
 
-image_path = '20231001_150912 - Copy.jpg'
+image_path = train_images[0]
 image = cv2.imread(image_path)
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
 image = cv2.resize(image, (224, 224))  # Resize the image
