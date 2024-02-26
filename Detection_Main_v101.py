@@ -13,20 +13,18 @@ from FaceModel_Functions_v103 import *
 
 lr=0.001
 num_epochs = 30
-best_model_path = 'best_model.pth'
+best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/best_model.pth'
 
 train_image_paths,train_labels = train_images,encoded_names
 val_image_paths,val_labels = train_images,encoded_names
 # train_image_paths,train_labels = test_images,test_names
 # val_image_paths,val_labels = test_images,test_names
-
 train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
 val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform)
 
 # Initialize the CNN model
 num_classes = len(unique_names)
-# num_classes = 2
-# model = CNNModel(num_classes)  # Example with 10 classes
+# model = CNNModel(num_classes)
 model = DeepFaceNet(num_classes)
 
 # Define device
@@ -38,7 +36,6 @@ model = model.to(device)
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr)
-
 
 def run_training():
     # Define DataLoader for training and validation sets
@@ -86,44 +83,43 @@ def run_training():
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': best_val_loss}, 
-	    'best_model.pth')
+	    best_model_path)
 
 
     print('Training complete.')
 
+
+###########################################################################
+###########################################################################
+
+
+
 # run_training()
-
-
 
 model = DeepFaceNet(num_classes)
 optimizer = optim.SGD(model.parameters(), lr, momentum=0.9)
-checkpoint = torch.load('best_model.pth')
+checkpoint = torch.load(best_model_path)
 model.load_state_dict(checkpoint['model_state_dict'])
 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 epoch = checkpoint['epoch']
 loss = checkpoint['loss']
 model.eval()
-
-print(epoch)
-print(loss)
+# print(epoch)
+# print(loss)
 for image_path in val_image_paths :
-    print(image_path)
+    # print(image_path)
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
     image = cv2.resize(image, (240, 240))  # Resize the image
     image = image / 255.0  # Normalize pixel values to [0, 1]
     image = np.transpose(image, (2, 0, 1))  # Transpose to (C, H, W) format
     image = torch.tensor(image).float()  # Convert numpy array to PyTorch tensor
-    # image = val_transform(image)  # Apply the preprocessing transformations
-
     # Add batch dimension since the model expects a batch of images
     image = image.unsqueeze(0)
 
     # Perform inference
     with torch.no_grad():
         output = model(image)
-
     # Get the predicted class
     _, predicted = torch.max(output, 1)
-
     print("Predicted class:", predicted.item())
