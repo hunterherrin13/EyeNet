@@ -7,11 +7,12 @@ from torchvision import transforms
 import cv2
 import numpy as np
 from Image_Loader_v101 import *
-from Model_Functions_v102 import *
+# from Model_Functions_v102 import *
+from FaceModel_Functions_v103 import *
 
 
-lr=0.01
-num_epochs = 10
+lr=0.001
+num_epochs = 30
 best_model_path = 'best_model.pth'
 
 train_image_paths,train_labels = test_images,test_names
@@ -23,7 +24,8 @@ val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform
 # Initialize the CNN model
 # num_classes = len(unique_names)
 num_classes = 2
-model = CNNModel(num_classes)  # Example with 10 classes
+# model = CNNModel(num_classes)  # Example with 10 classes
+model = DeepFaceNet(num_classes)
 
 # Define device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -85,11 +87,11 @@ def run_training():
 
     print('Training complete.')
 
-run_training()
+# run_training()
 
 
 # num_classes = 10  # Example with 10 classes
-model = CNNModel(num_classes)
+model = DeepFaceNet(num_classes)
 optimizer = optim.SGD(model.parameters(), lr, momentum=0.9)
 
 checkpoint = torch.load('best_model.pth')
@@ -101,7 +103,8 @@ model.eval()
 
 # print(epoch)
 # print(loss)
-for image_path in train_images:
+for image_path in val_image_paths :
+    print(image_path)
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
     image = cv2.resize(image, (240, 240))  # Resize the image

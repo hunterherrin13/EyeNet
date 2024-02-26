@@ -42,9 +42,9 @@ val_transform = transforms.Compose([
 ])
 
 
-class CNN(nn.Module):
+class CNNModel(nn.Module):
     def __init__(self, num_classes):
-        super(CNN, self).__init__()
+        super(CNNModel, self).__init__()
         # Define the convolutional layers
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)
@@ -59,7 +59,7 @@ class CNN(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         
         # Define the fully connected layers
-        self.fc1 = nn.Linear(128 * 28 * 28, 512)
+        self.fc1 = nn.Linear(128 * 30 * 30, 512)  # Update the input size for fc1
         self.fc2 = nn.Linear(512, num_classes)
         
     def forward(self, x):
@@ -70,10 +70,11 @@ class CNN(nn.Module):
         x = self.pool(x)
         x = F.relu(self.bn3(self.conv3(x)))
         x = self.pool(x)
-        
-        # Flatten the output for the fully connected layers
-        x = x.view(-1, 128 * 28 * 28)
-        
+        # Calculate the size of the tensor before passing it to the fully connected layers
+        # The size depends on the input image size and the operations performed by the convolutional and pooling layers
+        # It's crucial to calculate this size correctly to avoid dimension mismatch errors
+        batch_size = x.size(0)
+        x = x.view(batch_size, -1)  # Flatten the output of the convolutional layers
         # Fully connected layers with ReLU activation
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
