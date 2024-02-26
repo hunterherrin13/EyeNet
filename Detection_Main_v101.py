@@ -15,19 +15,23 @@ lr=0.001
 num_epochs = 30
 best_model_path = 'best_model.pth'
 
-train_image_paths,train_labels = test_images,test_names
-val_image_paths,val_labels = test_images,test_names
+train_image_paths,train_labels = train_images,encoded_names
+val_image_paths,val_labels = train_images,encoded_names
+# train_image_paths,train_labels = test_images,test_names
+# val_image_paths,val_labels = test_images,test_names
 
 train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
 val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform)
 
 # Initialize the CNN model
-# num_classes = len(unique_names)
-num_classes = 2
+num_classes = len(unique_names)
+# num_classes = 2
 # model = CNNModel(num_classes)  # Example with 10 classes
 model = DeepFaceNet(num_classes)
 
 # Define device
+if torch.cuda.is_available():
+    print("\nGPU ACCELERATED!\n")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
@@ -90,10 +94,9 @@ def run_training():
 # run_training()
 
 
-# num_classes = 10  # Example with 10 classes
+
 model = DeepFaceNet(num_classes)
 optimizer = optim.SGD(model.parameters(), lr, momentum=0.9)
-
 checkpoint = torch.load('best_model.pth')
 model.load_state_dict(checkpoint['model_state_dict'])
 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -101,8 +104,8 @@ epoch = checkpoint['epoch']
 loss = checkpoint['loss']
 model.eval()
 
-# print(epoch)
-# print(loss)
+print(epoch)
+print(loss)
 for image_path in val_image_paths :
     print(image_path)
     image = cv2.imread(image_path)
