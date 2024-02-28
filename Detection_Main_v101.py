@@ -6,8 +6,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 import cv2
 import numpy as np
-from Image_Loader_v101 import *
-# from Model_Functions_v102 import *
+from Detection_Net_Tools import *
 from FaceModel_Functions_v103 import *
 
 

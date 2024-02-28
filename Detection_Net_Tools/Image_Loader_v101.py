@@ -4,7 +4,6 @@ import random
 path = 'C:/PROJECT_CODE/DETECTION_NET/FACES_20240224'
 
 train_images = glob.glob(path+'/*.jpg')
-
 train_images = train_images[0:23]
 
 names=[]

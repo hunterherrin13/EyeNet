@@ -5,13 +5,6 @@ import torch.optim as optim
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-
-
-# Define device
-# if torch.cuda.is_available():
-#     print("\nGPU ACCELERATED!\n")
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 if torch.cuda.is_available():
         print("CUDA is available.")
         print("Number of CUDA devices:", torch.cuda.device_count())
