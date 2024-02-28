@@ -1,28 +1,21 @@
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset
-from torchvision import transforms
-import cv2
-import numpy as np
-from Detection_Net_Tools_v101 import *
+from Detection_Net_Tools import Image_Loader_v101 as IML
 from FaceModel_Functions_v103 import *
 
 
 lr=0.001
-num_epochs = 30
+num_epochs = 50
 best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/best_model.pth'
 
-train_image_paths,train_labels = train_images,encoded_names
-val_image_paths,val_labels = train_images,encoded_names
+train_image_paths,train_labels = IML.train_images,IML.encoded_names
+val_image_paths,val_labels = IML.train_images,IML.encoded_names
 # train_image_paths,train_labels = test_images,test_names
 # val_image_paths,val_labels = test_images,test_names
 train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
 val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform)
 
 # Initialize the CNN model
-num_classes = len(unique_names)
+num_classes = len(IML.unique_names)
 # model = CNNModel(num_classes)
 model = DeepFaceNet(num_classes)
 
@@ -103,10 +96,12 @@ optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 epoch = checkpoint['epoch']
 loss = checkpoint['loss']
 model.eval()
-# print(epoch)
-# print(loss)
+
+print(epoch)
+print(loss)
+
 for image_path in val_image_paths :
-    # print(image_path)
+    print(image_path)
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
     image = cv2.resize(image, (240, 240))  # Resize the image
