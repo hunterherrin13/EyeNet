@@ -39,18 +39,22 @@ class GUI(QWidget):
 
         # Create buttons with associated functions
         self.buttons = []  # Store buttons for later use
-        for i in range(5):
+        for i in range(4):
             button = QPushButton(f"Button {i+1}")
             button.setStyleSheet(get_button_style())
             button.clicked.connect(self.create_thread(self.functions[i]))
             button_layout1.addWidget(button)
             self.buttons.append(button)
 
-        # Terminate Functions Button
+        # Terminate and Restart Buttons
         self.terminate_button = QPushButton("Terminate Functions")
+        self.restart_button = QPushButton("Restart Software")
         self.terminate_button.setStyleSheet(get_button_style())
+        self.restart_button.setStyleSheet(get_button_style())
         self.terminate_button.clicked.connect(self.terminate_threads)
+        self.restart_button.clicked.connect(self.restart_software)
         button_layout2.addWidget(self.terminate_button)
+        button_layout2.addWidget(self.restart_button)
 
         # Image Display
         self.image_label = QLabel()
@@ -73,8 +77,14 @@ class GUI(QWidget):
         self.update_button_style()  # Update button style
         self.show_warning_message()  # Show warning message
 
+    def restart_software(self):
+        for button in self.buttons + [self.terminate_button, self.restart_button]:
+            button.setEnabled(True)
+            button.setStyleSheet(get_button_style())
+        self.worker_threads.clear()
+
     def update_button_style(self):
-        for button in self.buttons + [self.terminate_button]:  # Include the terminate button
+        for button in self.buttons + [self.terminate_button, self.restart_button]:  # Include the terminate button
             button.setStyleSheet(get_button_style_red())
 
     def show_warning_message(self):
@@ -104,13 +114,9 @@ class GUI(QWidget):
         # Placeholder function for Button 4
         print("Function 4")
 
-    def function5(self):
-        # Placeholder function for Button 5
-        print("Function 5")
-
     @property
     def functions(self):
-        return [self.function1, self.function2, self.function3, self.function4, self.function5]
+        return [self.function1, self.function2, self.function3, self.function4]
 
 
 def get_button_style():
