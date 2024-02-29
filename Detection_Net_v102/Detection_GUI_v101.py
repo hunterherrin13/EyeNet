@@ -1,9 +1,13 @@
-import sys
+import sys,os
 import threading
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 import time
+
+CWD = os.getcwd().replace('\\','/')
+
+# print(CWD)
 
 class WorkerThread(threading.Thread):
     def __init__(self, function):
@@ -26,7 +30,10 @@ class GUI(QWidget):
 
         self.setWindowTitle("Detection_NET GUI - HUNTER HERRIN")
         self.setMinimumSize(400, 300)  # Set minimum size
-        self.setMaximumSize(800, 600)  # Set maximum size
+        self.resize(800, 600)
+
+        # Set window icon
+        self.setWindowIcon(QIcon(CWD + '/Detection_Net_Objects/HH-ICO.ico'))
 
         layout = QVBoxLayout()
         self.setLayout(layout)
