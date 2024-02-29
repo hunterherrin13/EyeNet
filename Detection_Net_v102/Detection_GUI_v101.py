@@ -117,6 +117,11 @@ class GUI(QWidget):
     @property
     def functions(self):
         return [self.function1, self.function2, self.function3, self.function4]
+    
+    def closeEvent(self, event):
+        for thread in self.worker_threads:
+            thread.stop()
+        event.accept()
 
 
 def get_button_style():
