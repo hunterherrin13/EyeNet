@@ -44,9 +44,9 @@ val_transform = transforms.Compose([
 
 
 # Define the FacialFeactureNet model with enhanced structure
-class FacialFeactureNet(nn.Module):
+class FacialLandmarkNet(nn.Module):
     def __init__(self,num_classes):
-        super(FacialFeactureNet, self).__init__()
+        super(FacialLandmarkNet, self).__init__()
         # Define the architecture
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, padding=1),

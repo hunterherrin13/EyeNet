@@ -23,9 +23,5 @@ def draw_circles_on_image(image_path, x_coordinates, y_coordinates, circle_color
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-# print(IML_Helen.train_image_master_list[0][0])
-print(IML_Helen.annotations_master_file[0][1])
 
 draw_circles_on_image(IML_Helen.train_image_master_list[0][0],IML_Helen.annotations_master_file[0][1],IML_Helen.annotations_master_file[0][2])
-
-# cv2.imread('C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1/1629243_1.jpg')

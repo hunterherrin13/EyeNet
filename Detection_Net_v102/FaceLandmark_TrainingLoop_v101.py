@@ -1,27 +1,20 @@
 
-from Detection_Net_Tools import Image_Loader_v101 as IML
 from Detection_Net_Tools import Image_Loader_HelenDataset_v102 as IML_Helen
-from FaceBehaviour_Functions_v103 import *
+from FaceLandmark_Functions_v101 import *
 
 
 lr=0.01
 num_epochs = 20
-best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/best_model.pth'
+best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/facelandmark_model.pth'
 
 train_image_paths,train_labels = IML.train_images,IML.encoded_names
-# print(train_image_paths)
-# print(train_labels)
-# print(IML.unique_names)
 val_image_paths,val_labels = IML.train_images,IML.encoded_names
-# train_image_paths,train_labels = test_images,test_names
-# val_image_paths,val_labels = test_images,test_names
 train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
 val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform)
 
 # Initialize the CNN model
 num_classes = len(IML.unique_names)
-# model = CNNModel(num_classes)
-model = DeepFaceNet(num_classes)
+model = FacialLandmarkNet(num_classes)
 
 # Define device
 if torch.cuda.is_available():
@@ -83,41 +76,3 @@ def run_training():
 
 
     print('Training complete.')
-
-
-###########################################################################
-###########################################################################
-
-
-
-run_training()
-
-model = DeepFaceNet(num_classes)
-optimizer = optim.SGD(model.parameters(), lr, momentum=0.9)
-checkpoint = torch.load(best_model_path)
-model.load_state_dict(checkpoint['model_state_dict'])
-optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-epoch = checkpoint['epoch']
-loss = checkpoint['loss']
-model.eval()
-
-print(epoch)
-print(loss)
-
-for image_path in val_image_paths :
-    print(image_path)
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
-    image = cv2.resize(image, (240, 240))  # Resize the image
-    image = image / 255.0  # Normalize pixel values to [0, 1]
-    image = np.transpose(image, (2, 0, 1))  # Transpose to (C, H, W) format
-    image = torch.tensor(image).float()  # Convert numpy array to PyTorch tensor
-    # Add batch dimension since the model expects a batch of images
-    image = image.unsqueeze(0)
-
-    # Perform inference
-    with torch.no_grad():
-        output = model(image)
-    # Get the predicted class
-    _, predicted = torch.max(output, 1)
-    print("Predicted class:", predicted.item())
