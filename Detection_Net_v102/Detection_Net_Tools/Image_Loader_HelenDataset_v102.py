@@ -20,13 +20,14 @@ train_image_master_list = []
 train_name_master_list = []
 for path in training_paths:
     train_images = glob.glob(path+'/*.jpg')
-    train_image_master_list.append(train_images)
+    # train_image_master_list.append(train_images)
+    train_image_path=[]
     train_names=[]
     for image in train_images:
+        train_image_path.append(image.replace('\\','/'))
         train_names.append(os.path.basename(image))
+    train_image_master_list.append(train_image_path)
     train_name_master_list.append(train_names)
-
-# print(train_name_master_list)
 
 
 matching_indices = []
