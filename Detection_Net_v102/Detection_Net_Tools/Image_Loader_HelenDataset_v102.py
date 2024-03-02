@@ -26,16 +26,16 @@ for path in training_paths:
         train_names.append(os.path.basename(image))
     train_name_master_list.append(train_names)
 
-print(train_name_master_list)
+# print(train_name_master_list)
 
 
 matching_indices = []
+for i in range(len(train_name_master_list)):
+    for j in range(len(annotations_master_file)):
+        for k in range(len(train_name_master_list[0])):
+            if train_name_master_list[i][k].find(annotations_master_file[j][0]) != -1:
+                # print(j)
+                # print(k)
+                matching_indices.append([i,j,k])
 
-for train_names in train_name_master_list:
-    for name in train_names:
-        for i, (image_name, _, _) in enumerate(annotations_master_file):
-            if name in image_name:
-                matching_indices.append(i)
-                break  # Move to the next train_names group
-
-print(matching_indices)
+# print("Matching indices:", matching_indices)
