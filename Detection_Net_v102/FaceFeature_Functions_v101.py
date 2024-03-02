@@ -1,38 +1,93 @@
-from facenet_pytorch import MTCNN, InceptionResnetV1
 import torch
-from torch.utils.data import DataLoader
-from torchvision import datasets
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+from torchvision import models, transforms
+import cv2
 import numpy as np
-import pandas as pd
-import os
-
-workers = 0 if os.name == 'nt' else 4
 
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-print('Running on device: {}'.format(device))
+class CustomDataset(Dataset):
+    def __init__(self, image_paths, labels, transform=None):
+        self.image_paths = image_paths
+        self.labels = labels
+        self.transform = transform
 
-mtcnn = MTCNN(
-    image_size=160, margin=0, min_face_size=20,
-    thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
-    device=device
-)
-# help(MTCNN)
+    def __len__(self):
+        return len(self.image_paths)
 
-resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)
+    def __getitem__(self, idx):
+        img_path = self.image_paths[idx]
+        image = cv2.imread(img_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        label = self.labels[idx]
+        
+        if self.transform:
+            image = self.transform(image)
+        
+        return image, label
 
-def collate_fn(x):
-    return x[0]
+# Define transformations for input images
+train_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize((240, 240)),
+    # transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
 
-dataset = datasets.ImageFolder('../data/test_images')
-dataset.idx_to_class = {i:c for c, i in dataset.class_to_idx.items()}
-loader = DataLoader(dataset, collate_fn=collate_fn, num_workers=workers)
+val_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize((240, 240)),
+    # transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
 
-aligned = []
-names = []
-for x, y in loader:
-    x_aligned, prob = mtcnn(x, return_prob=True)
-    if x_aligned is not None:
-        print('Face detected with probability: {:8f}'.format(prob))
-        aligned.append(x_aligned)
-        names.append(dataset.idx_to_class[y])
+
+# Define the FacialFeactureNet model with enhanced structure
+class FacialFeactureNet(nn.Module):
+    def __init__(self,num_classes):
+        super(FacialFeactureNet, self).__init__()
+        # Define the architecture
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 128, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(256, 512, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, 512, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, 512, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.avgpool = nn.AdaptiveAvgPool2d((7, 7))  # Adaptive average pooling layer
+        self.fc = nn.Sequential(
+            nn.Linear(512 * 7 * 7, 4096),  # Additional fully connected layers
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        return x
