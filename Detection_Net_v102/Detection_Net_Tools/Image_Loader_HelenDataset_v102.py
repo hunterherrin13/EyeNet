@@ -41,8 +41,6 @@ for path in validation_paths:
     val_image_master_list.append(val_image_path)
     val_name_master_list.append(val_names)
 
-# print(val_name_master_list)
-
 train_matching_indices = []
 val_matching_indices = []
 for i in range(len(annotations_master_file)):
@@ -55,5 +53,16 @@ for i in range(len(annotations_master_file)):
             if val_name_master_list[j][k].find(annotations_master_file[i][0]) != -1:
                 val_matching_indices.append([i,j,k])
 
+def name_encoder(name_master_list):
+    # Flatten train_name_master_list
+    flattened_names = [name for sublist in name_master_list for name in sublist]
+    # Generate a mapping from original names to encoded integers
+    name_to_encoded = {name: i for i, name in enumerate(sorted(set(flattened_names)))}
+    # Encode the list of names while maintaining the structure of train_name_master_list
+    encoded_names = [[name_to_encoded[name] for name in sublist] for sublist in name_master_list]
+    # Generate a list of unique encoded names
+    unique_names = list(range(len(set(flattened_names))))
+    return unique_names,encoded_names
 
-print(val_matching_indices)
+training_unique_names,training_encoded_names = name_encoder(train_name_master_list)
+val_unique_names,val_encoded_names = name_encoder(val_name_master_list)

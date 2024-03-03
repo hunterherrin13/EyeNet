@@ -9,9 +9,6 @@ num_epochs = 20
 best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/best_model.pth'
 
 train_image_paths,train_labels = IML.train_images,IML.encoded_names
-# print(train_image_paths)
-# print(train_labels)
-# print(IML.unique_names)
 val_image_paths,val_labels = IML.train_images,IML.encoded_names
 # train_image_paths,train_labels = test_images,test_names
 # val_image_paths,val_labels = test_images,test_names

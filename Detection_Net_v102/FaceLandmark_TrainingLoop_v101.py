@@ -4,16 +4,16 @@ from FaceLandmark_Functions_v101 import *
 
 
 lr=0.01
-num_epochs = 20
+num_epochs = 10
 best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/facelandmark_model.pth'
 
-train_image_paths,train_labels = IML.train_images,IML.encoded_names
-val_image_paths,val_labels = IML.train_images,IML.encoded_names
+train_image_paths,train_labels = IML_Helen.train_image_master_list,IML.encoded_names
+val_image_paths,val_labels = IML_Helen.train_image_master_list,IML.encoded_names
 train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
 val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform)
 
 # Initialize the CNN model
-num_classes = len(IML.unique_names)
+num_classes = len(IML_Helen.training_unique_names)
 model = FacialLandmarkNet(num_classes)
 
 # Define device
