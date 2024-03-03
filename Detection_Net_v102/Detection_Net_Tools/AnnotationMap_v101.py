@@ -24,4 +24,4 @@ def draw_circles_on_image(image_path, x_coordinates, y_coordinates, circle_color
     cv2.destroyAllWindows()
 
 
-draw_circles_on_image(IML_Helen.train_image_master_list[0][0],IML_Helen.annotations_master_file[0][1],IML_Helen.annotations_master_file[0][2])
+draw_circles_on_image(IML_Helen.val_image_master_list[0][0],IML_Helen.annotations_master_file[1115][1],IML_Helen.annotations_master_file[1115][2])

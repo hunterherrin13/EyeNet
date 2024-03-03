@@ -4,6 +4,7 @@ import pandas as pd
 
 annotaion_path = 'C:/PROJECT_CODE/DETECTION_NET/Helen-Images/annotation'
 training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1']
+validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test']
 
 annotations = glob.glob(annotaion_path+'/*.txt')
 annotations[0]
@@ -20,7 +21,6 @@ train_image_master_list = []
 train_name_master_list = []
 for path in training_paths:
     train_images = glob.glob(path+'/*.jpg')
-    # train_image_master_list.append(train_images)
     train_image_path=[]
     train_names=[]
     for image in train_images:
@@ -29,14 +29,31 @@ for path in training_paths:
     train_image_master_list.append(train_image_path)
     train_name_master_list.append(train_names)
 
+val_image_master_list = []
+val_name_master_list = []
+for path in validation_paths:
+    val_images = glob.glob(path+'/*.jpg')
+    val_image_path=[]
+    val_names=[]
+    for image in val_images:
+        val_image_path.append(image.replace('\\','/'))
+        val_names.append(os.path.basename(image))
+    val_image_master_list.append(val_image_path)
+    val_name_master_list.append(val_names)
 
-matching_indices = []
-for i in range(len(train_name_master_list)):
-    for j in range(len(annotations_master_file)):
+# print(val_name_master_list)
+
+train_matching_indices = []
+val_matching_indices = []
+for i in range(len(annotations_master_file)):
+    for j in range(len(train_name_master_list)):
         for k in range(len(train_name_master_list[0])):
-            if train_name_master_list[i][k].find(annotations_master_file[j][0]) != -1:
-                # print(j)
-                # print(k)
-                matching_indices.append([i,j,k])
+            if train_name_master_list[j][k].find(annotations_master_file[i][0]) != -1:
+                train_matching_indices.append([i,j,k])
+    for j in range(len(val_name_master_list)):
+        for k in range(len(val_name_master_list[0])):
+            if val_name_master_list[j][k].find(annotations_master_file[i][0]) != -1:
+                val_matching_indices.append([i,j,k])
 
-# print("Matching indices:", matching_indices)
+
+print(val_matching_indices)
