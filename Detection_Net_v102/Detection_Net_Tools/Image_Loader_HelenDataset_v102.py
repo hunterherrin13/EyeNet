@@ -3,8 +3,19 @@ import random
 import pandas as pd
 
 annotaion_path = 'C:/PROJECT_CODE/DETECTION_NET/Helen-Images/annotation'
-training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1']
-validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test']
+training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_train']
+validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_val']
+
+def name_encoder(name_master_list):
+    # Flatten train_name_master_list
+    flattened_names = [name for sublist in name_master_list for name in sublist]
+    # Generate a mapping from original names to encoded integers
+    name_to_encoded = {name: i for i, name in enumerate(sorted(set(flattened_names)))}
+    # Encode the list of names while maintaining the structure of train_name_master_list
+    encoded_names = [[name_to_encoded[name] for name in sublist] for sublist in name_master_list]
+    # Generate a list of unique encoded names
+    unique_names = list(range(len(set(flattened_names))))
+    return unique_names,encoded_names
 
 annotations = glob.glob(annotaion_path+'/*.txt')
 annotations[0]
@@ -41,6 +52,11 @@ for path in validation_paths:
     val_image_master_list.append(val_image_path)
     val_name_master_list.append(val_names)
 
+training_unique_names,training_encoded_names = name_encoder(train_name_master_list)
+val_unique_names,val_encoded_names = name_encoder(val_name_master_list)
+
+
+
 train_matching_indices = []
 val_matching_indices = []
 for i in range(len(annotations_master_file)):
@@ -53,16 +69,18 @@ for i in range(len(annotations_master_file)):
             if val_name_master_list[j][k].find(annotations_master_file[i][0]) != -1:
                 val_matching_indices.append([i,j,k])
 
-def name_encoder(name_master_list):
-    # Flatten train_name_master_list
-    flattened_names = [name for sublist in name_master_list for name in sublist]
-    # Generate a mapping from original names to encoded integers
-    name_to_encoded = {name: i for i, name in enumerate(sorted(set(flattened_names)))}
-    # Encode the list of names while maintaining the structure of train_name_master_list
-    encoded_names = [[name_to_encoded[name] for name in sublist] for sublist in name_master_list]
-    # Generate a list of unique encoded names
-    unique_names = list(range(len(set(flattened_names))))
-    return unique_names,encoded_names
+# print(train_name_master_list)
 
-training_unique_names,training_encoded_names = name_encoder(train_name_master_list)
-val_unique_names,val_encoded_names = name_encoder(val_name_master_list)
+train_ordered_path = []
+train_ordered_annotation = []
+train_label = []
+for i in range(len(train_matching_indices)):
+    # print(i)
+    temp = [train_image_master_list[train_matching_indices[i][1]][train_matching_indices[i][2]]]
+    temp_xy = annotations_master_file[train_matching_indices[i][0]][1],annotations_master_file[train_matching_indices[i][0]][2]
+    label=0
+    train_ordered_path.append(temp)
+    train_ordered_annotation.append(temp_xy)
+    train_label.append(label)
+
+print(train_ordered_path)

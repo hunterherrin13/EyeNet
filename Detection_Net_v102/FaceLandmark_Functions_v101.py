@@ -6,9 +6,11 @@ from torchvision import models, transforms
 import cv2
 import numpy as np
 
+
 class CustomDataset(Dataset):
     def __init__(self, image_paths, landmarks, labels, transform=None):
         self.image_paths = image_paths
+        # print(image_paths)
         self.landmarks = landmarks
         self.labels = labels
         self.transform = transform
@@ -18,7 +20,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
-        image = cv2.imread(img_path)
+        image = cv2.imread(img_path[0])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         landmark = self.landmarks[idx]
         label = self.labels[idx]
@@ -26,9 +28,12 @@ class CustomDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return image, landmark, label
+        # Convert landmark to tensor
+        landmark_tensor = torch.tensor(landmark, dtype=torch.float)  # Assuming landmark is a list of coordinates
+
+        return image, landmark_tensor, label
     
-    
+
 # Define transformations for input images
 train_transform = transforms.Compose([
     transforms.ToTensor(),

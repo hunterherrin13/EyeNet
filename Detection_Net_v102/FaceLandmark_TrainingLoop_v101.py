@@ -7,14 +7,13 @@ lr=0.01
 num_epochs = 10
 best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/facelandmark_model.pth'
 
-train_image_paths,train_labels = IML_Helen.train_image_master_list,IML.encoded_names
-val_image_paths,val_labels = IML_Helen.train_image_master_list,IML.encoded_names
-train_dataset = CustomDataset(train_image_paths, train_labels, transform=train_transform)
-val_dataset = CustomDataset(val_image_paths, val_labels, transform=val_transform)
+train_dataset = CustomDataset(IML_Helen.train_ordered_path, IML_Helen.train_ordered_annotation, IML_Helen.train_label, transform=train_transform)
+val_dataset = CustomDataset(IML_Helen.train_ordered_path, IML_Helen.train_ordered_annotation, IML_Helen.train_label, transform=val_transform)
 
 # Initialize the CNN model
-num_classes = len(IML_Helen.training_unique_names)
-model = FacialLandmarkNet(num_classes)
+num_classes = 1
+num_landmarks = 194
+model = FacialLandmarkNet(num_classes, num_landmarks)
 
 # Define device
 if torch.cuda.is_available():
@@ -34,15 +33,16 @@ def run_training():
     for epoch in range(num_epochs):
         model.train()
         train_loss = 0.0
-        for inputs, labels in train_dataloader:
-            inputs = inputs.to(device)
+        for images, landmarks, labels in train_dataloader:
+            images = images.to(device)
+            landmarks = landmarks.to(device)  # Move landmarks to the same device as images
             labels = labels.to(device)
             optimizer.zero_grad()
-            outputs = model(inputs)
+            outputs = model(images, landmarks)  # Pass images and landmarks to the model
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-            train_loss += loss.item() * inputs.size(0)
+            train_loss += loss.item() * images.size(0)
         
         # Validate the model
         model.eval()
@@ -50,11 +50,11 @@ def run_training():
         correct = 0
         total = 0
         with torch.no_grad():
-            for inputs, labels in val_dataloader:
-                inputs, labels = inputs.to(device), labels.to(device)
-                outputs = model(inputs)
+            for images, landmarks, labels in val_dataloader:
+                images, landmarks, labels = images.to(device), landmarks.to(device), labels.to(device)
+                outputs = model(images, landmarks)
                 loss = criterion(outputs, labels)
-                val_loss += loss.item() * inputs.size(0)
+                val_loss += loss.item() * images.size(0)
                 _, predicted = torch.max(outputs, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
@@ -69,10 +69,13 @@ def run_training():
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save({'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': best_val_loss}, 
-	    best_model_path)
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'loss': best_val_loss}, 
+                       best_model_path)
 
 
     print('Training complete.')
+
+
+run_training()
