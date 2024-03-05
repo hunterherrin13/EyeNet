@@ -69,7 +69,6 @@ for i in range(len(annotations_master_file)):
             if val_name_master_list[j][k].find(annotations_master_file[i][0]) != -1:
                 val_matching_indices.append([i,j,k])
 
-# print(train_name_master_list)
 
 train_ordered_path = []
 train_ordered_annotation = []
@@ -82,5 +81,3 @@ for i in range(len(train_matching_indices)):
     train_ordered_path.append(temp)
     train_ordered_annotation.append(temp_xy)
     train_label.append(label)
-
-print(train_ordered_path)
