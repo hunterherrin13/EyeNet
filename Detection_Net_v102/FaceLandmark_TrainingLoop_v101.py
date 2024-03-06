@@ -1,4 +1,6 @@
 
+from datetime import datetime
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from Detection_Net_Tools import Image_Loader_HelenDataset_v102 as IML_Helen
 from FaceLandmark_Functions_v102 import *
 
@@ -24,9 +26,9 @@ model = model.to(device)
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr)
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, verbose=True)
 
 def run_training():
-    # Define DataLoader for training and validation sets
     best_val_loss = float('inf')
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=32)
@@ -35,10 +37,10 @@ def run_training():
         train_loss = 0.0
         for images, landmarks, labels in train_dataloader:
             images = images.to(device)
-            landmarks = landmarks.to(device)  # Move landmarks to the same device as images
+            landmarks = landmarks.to(device)
             labels = labels.to(device)
             optimizer.zero_grad()
-            outputs = model(images, landmarks)  # Pass images and landmarks to the model
+            outputs = model(images, landmarks)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -59,23 +61,26 @@ def run_training():
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
         
+        # Update learning rate
+        scheduler.step(val_loss)
+        
         # Print statistics
         train_loss /= len(train_dataset)
         val_loss /= len(val_dataset)
         accuracy = 100 * correct / total
         print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {accuracy:.2f}%')
         
-        # Save the best model
+        # Save the model if validation loss has improved
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save({'epoch': epoch,
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
-                        'loss': best_val_loss}, 
-                       best_model_path)
-
+                        'best_val_loss': best_val_loss,
+                        'train_loss': train_loss,
+                        'val_loss': val_loss,
+                        'metrics': {'accuracy': accuracy},
+                        'date_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, 
+                    best_model_path)
 
     print('Training complete.')
-
-
-run_training()

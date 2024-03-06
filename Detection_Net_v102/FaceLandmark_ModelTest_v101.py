@@ -14,16 +14,18 @@ def preprocess_image_inference(image_path, transform=None):
 
     return image
 
-# Function to predict landmarks using the trained model
 def predict_landmarks(model, image_tensor, num_landmarks):
-    dummy_landmarks = torch.zeros(image_tensor.size(0), num_landmarks * 2)  # Dummy landmarks
     model.eval()
     with torch.no_grad():
+        # Generate dummy landmarks with the correct shape
+        dummy_landmarks = torch.zeros((image_tensor.size(0), num_landmarks, 2))  # Assuming each landmark has x and y coordinates
         outputs = model(image_tensor, dummy_landmarks)  # Pass dummy landmarks
     
     # Separate image features and landmark features
     image_features = outputs[:, :-num_landmarks*2]
     landmark_features = outputs[:, -num_landmarks*2:]
+    
+    print("Shape of landmark_features:", landmark_features.shape)  # Print shape for debugging
     
     # Reshape landmark features to get coordinates
     predicted_landmarks = landmark_features.view(-1, num_landmarks, 2)  # Assuming each landmark has x and y coordinates
