@@ -91,11 +91,9 @@ class FacialLandmarkNet(nn.Module):
         self.fc_landmarks = nn.Sequential(
             nn.Linear(self.num_landmarks * 2, 512),  # Assuming each landmark has x and y coordinates
             nn.ReLU(inplace=True),
-            nn.Dropout(),
             nn.Linear(512, 512),
             nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(512, num_classes)
+            nn.Linear(512, num_landmarks * 2)  # Adjust output dimension for landmarks
         )
 
     def forward(self, image, landmarks=None):
@@ -107,9 +105,11 @@ class FacialLandmarkNet(nn.Module):
         
         if landmarks is not None:
             # Process landmarks
-            landmarks = landmarks.view(-1, self.num_landmarks * 2)  # Flatten landmarks
             landmarks_output = self.fc_landmarks(landmarks)
             
+            # Reshape landmarks output to match the format [N, 194, 2]
+            landmarks_output = landmarks_output.view(-1, self.num_landmarks, 2)
+        
             # Concatenate image and landmarks features
             x = torch.cat((x, landmarks_output), dim=1)
         

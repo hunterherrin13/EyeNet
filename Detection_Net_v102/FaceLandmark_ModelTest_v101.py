@@ -27,30 +27,33 @@ metrics = checkpoint['metrics']
 date_time = checkpoint['date_time']
 model.eval()
 
-def preprocess_image(image):
-    # Resize image to a fixed size if necessary
-    # Assuming you want to resize to (224, 224)
-    resized_image = cv2.resize(image, (224, 224))
-    # Normalize image if necessary (convert to float and scale to [0, 1] range)
-    normalized_image = resized_image.astype(np.float32) / 255.0
-    # You may need to further preprocess the image depending on your model's requirements
-    return normalized_image
 
 def predict_landmarks(image_path):
     # Load the image using OpenCV
     image = cv2.imread(image_path)
-    preprocessed_image = preprocess_image(image)
-    # Convert the preprocessed image to a tensor
-    tensor_image = torch.tensor(preprocessed_image, dtype=torch.float)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    tensor_image = val_transform(image)
     # Add batch dimension
     tensor_image = tensor_image.unsqueeze(0)
     # Forward pass through the model
     with torch.no_grad():
         outputs = model(tensor_image)
-        print(outputs)
+    # Print shape and contents of the output tensor
+    print("Output tensor shape:", outputs.shape)
+    print("Output tensor contents:", outputs)
+    # Extract predicted landmarks from the output tensor
+    # landmarks_predictions = outputs[:, -num_landmarks*2:]  # Assuming landmarks are concatenated to the end of the output tensor
+    # Reshape landmarks predictions
+    # landmarks_predictions = landmarks_predictions.view(-1, num_landmarks, 2)  # Reshape to match the format of the landmarks
+    # Display the image for visualization purposes
+    # cv2.imshow("Image", image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    # print(landmarks_predictions)
+
     return outputs
 
 # Example usage
-image_path = 'path_to_your_image.jpg'
+image_path = 'C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1/10406776_1.jpg'
 predicted_landmarks = predict_landmarks(image_path)
 print(predicted_landmarks)
