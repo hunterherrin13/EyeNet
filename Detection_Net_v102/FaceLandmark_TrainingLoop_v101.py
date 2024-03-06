@@ -26,7 +26,7 @@ model = model.to(device)
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr)
-scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, verbose=True)
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3)
 
 def run_training():
     best_val_loss = float('inf')
@@ -63,6 +63,7 @@ def run_training():
         
         # Update learning rate
         scheduler.step(val_loss)
+        print("Learning rate:", scheduler.get_last_lr())
         
         # Print statistics
         train_loss /= len(train_dataset)

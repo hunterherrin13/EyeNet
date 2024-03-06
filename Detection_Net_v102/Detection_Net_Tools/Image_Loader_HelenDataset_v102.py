@@ -5,6 +5,8 @@ import pandas as pd
 annotaion_path = 'C:/PROJECT_CODE/DETECTION_NET/Helen-Images/annotation'
 training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_train']
 validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_val']
+# training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1']
+# validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test']
 
 def name_encoder(name_master_list):
     # Flatten train_name_master_list
