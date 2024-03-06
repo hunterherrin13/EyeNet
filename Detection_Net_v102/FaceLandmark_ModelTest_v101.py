@@ -39,17 +39,17 @@ def predict_landmarks(image_path):
     with torch.no_grad():
         outputs = model(tensor_image)
     # Print shape and contents of the output tensor
-    print("Output tensor shape:", outputs.shape)
-    print("Output tensor contents:", outputs)
+    # print("Output tensor shape:", outputs.shape)
+    # print("Output tensor contents:", outputs)
     # Extract predicted landmarks from the output tensor
-    # landmarks_predictions = outputs[:, -num_landmarks*2:]  # Assuming landmarks are concatenated to the end of the output tensor
+    landmarks_predictions = outputs[:, -num_landmarks*2:]  # Assuming landmarks are concatenated to the end of the output tensor
     # Reshape landmarks predictions
-    # landmarks_predictions = landmarks_predictions.view(-1, num_landmarks, 2)  # Reshape to match the format of the landmarks
+    landmarks_predictions = landmarks_predictions.view(-1, num_landmarks, 2)  # Reshape to match the format of the landmarks
     # Display the image for visualization purposes
     # cv2.imshow("Image", image)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
-    # print(landmarks_predictions)
+    print(landmarks_predictions)
 
     return outputs
 

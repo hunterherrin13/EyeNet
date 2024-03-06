@@ -85,3 +85,5 @@ def run_training():
                     best_model_path)
 
     print('Training complete.')
+
+run_training()

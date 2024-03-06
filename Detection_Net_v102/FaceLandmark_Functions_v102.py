@@ -79,38 +79,33 @@ class FacialLandmarkNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))  # Adaptive average pooling layer
         # Define fully connected layers for image processing
         self.fc_image = nn.Sequential(
-            nn.Linear(512 * 7 * 7, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, num_classes)
-        )
+    nn.Linear(512 * 7 * 7, num_landmarks * 2),  # Adjusted output size to match input size of fc_landmarks
+    nn.ReLU(inplace=True),
+    nn.Dropout()
+)
         # Define fully connected layers for landmarks
         self.fc_landmarks = nn.Sequential(
-            nn.Linear(self.num_landmarks * 2, 512),  # Assuming each landmark has x and y coordinates
-            nn.ReLU(inplace=True),
-            nn.Linear(512, 512),
-            nn.ReLU(inplace=True),
-            nn.Linear(512, num_landmarks * 2)  # Adjust output dimension for landmarks
-        )
+    nn.Linear(388, 512),  # Adjusted input size to match output size of fc_image
+    nn.ReLU(inplace=True),
+    nn.Dropout(),
+    nn.Linear(512, num_landmarks * 2)  # Output shape should be [N, num_landmarks * 2]
+)
 
     def forward(self, image, landmarks=None):
         # Process image
         x = self.features(image)
+        # print("Feature map shape:", x.shape)
         x = self.avgpool(x)
+        # print("After adaptive avg pooling shape:", x.shape)
         x = torch.flatten(x, 1)
+        # print("After flattening shape:", x.shape)
         x = self.fc_image(x)
+        # print("After fc_image shape:", x.shape)
         
         if landmarks is not None:
             # Process landmarks
-            landmarks_output = self.fc_landmarks(landmarks)
-            
-            # Reshape landmarks output to match the format [N, 194, 2]
-            landmarks_output = landmarks_output.view(-1, self.num_landmarks, 2)
-        
-            # Concatenate image and landmarks features
-            x = torch.cat((x, landmarks_output), dim=1)
+            landmarks_output = self.fc_landmarks(x)  # Use the output of the image processing part
+            print("Landmarks output shape:", landmarks_output.shape)
+            x = landmarks_output
         
         return x
