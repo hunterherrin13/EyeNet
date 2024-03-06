@@ -4,8 +4,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from Detection_Net_Tools import Image_Loader_HelenDataset_v102 as IML_Helen
 from FaceLandmark_Functions_v102 import *
 
-
-lr=0.01
+lr = 0.01
 num_epochs = 10
 best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/facelandmark_model.pth'
 
@@ -18,30 +17,43 @@ num_landmarks = 194
 model = FacialLandmarkNet(num_classes, num_landmarks)
 
 # Define device
-if torch.cuda.is_available():
-    print("\nGPU ACCELERATED!\n")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
+# model.train()
 
-# Define loss function and optimizer
-criterion = nn.CrossEntropyLoss()
+# Define criterion for image classification task
+criterion_image = nn.CrossEntropyLoss()
+# Define criterion for landmark prediction task (assuming you are using Mean Squared Error loss)
+criterion_landmark = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr)
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3)
 
 def run_training():
     best_val_loss = float('inf')
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
-    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=32)
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=2400, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=2400)
     for epoch in range(num_epochs):
         model.train()
+        print(f'Model is in training mode: {model.training}')
         train_loss = 0.0
         for images, landmarks, labels in train_dataloader:
+            # Move data to GPU if available
             images = images.to(device)
             landmarks = landmarks.to(device)
             labels = labels.to(device)
-            optimizer.zero_grad()
+            # Forward pass
             outputs = model(images, landmarks)
-            loss = criterion(outputs, labels)
+            # Separate outputs for classification and landmark prediction
+            image_outputs, landmark_outputs = outputs
+            landmark_outputs = landmark_outputs.view(-1, 2, 194)
+            # Calculate classification loss (assuming using cross-entropy loss)
+            image_loss = criterion_image(image_outputs, labels)  # Adjust the criterion function accordingly 
+            # Calculate landmark prediction loss (assuming using some appropriate loss function)
+            landmark_loss = criterion_landmark(landmark_outputs, landmarks)  # Adjust the criterion function accordingly
+            # Combine losses if needed
+            loss = image_loss + landmark_loss
+            # Backward pass and optimization
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * images.size(0)
@@ -53,11 +65,23 @@ def run_training():
         total = 0
         with torch.no_grad():
             for images, landmarks, labels in val_dataloader:
+                # Move data to GPU if available
                 images, landmarks, labels = images.to(device), landmarks.to(device), labels.to(device)
+                # Forward pass
                 outputs = model(images, landmarks)
-                loss = criterion(outputs, labels)
+                # Separate outputs for classification and landmark prediction
+                image_outputs, landmark_outputs = outputs
+                landmark_outputs = landmark_outputs.view(-1, 2, 194)
+                # Calculate classification loss (assuming using cross-entropy loss)
+                image_loss = criterion_image(image_outputs, labels)  # Adjust the criterion function accordingly 
+                # Calculate landmark prediction loss (assuming using some appropriate loss function)
+                landmark_loss = criterion_landmark(landmark_outputs, landmarks)  # Adjust the criterion function accordingly
+                # Combine losses if needed
+                loss = image_loss + landmark_loss
+                # Accumulate validation loss
                 val_loss += loss.item() * images.size(0)
-                _, predicted = torch.max(outputs, 1)
+                # Calculate accuracy
+                _, predicted = torch.max(image_outputs, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
         
@@ -85,3 +109,5 @@ def run_training():
                     best_model_path)
 
     print('Training complete.')
+
+run_training()

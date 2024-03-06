@@ -28,41 +28,22 @@ date_time = checkpoint['date_time']
 model.eval()
 
 
-def reverse_transform_landmarks(landmarks_tensor, image_height, image_width):
-    # Calculate the scale factors for height and width
-    height_scale = image_height / 240  # Assuming the original height was 240
-    width_scale = image_width / 240  # Assuming the original width was 240
-    
-    # Apply the scale factors to the landmark coordinates
-    landmarks_tensor[:, :, 0] *= width_scale
-    landmarks_tensor[:, :, 1] *= height_scale
-    
-    return landmarks_tensor
-
 def predict_landmarks(image_path):
     # Load the image using OpenCV
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
     # Convert image to tensor using the validation transform
     tensor_image = val_transform(image)
-    
     # Add batch dimension
     tensor_image = tensor_image.unsqueeze(0)
-    
     # Forward pass through the model
     with torch.no_grad():
         outputs = model(tensor_image)
-    
     # Extract predicted landmarks from the output tensor
-    landmarks_predictions = outputs[:, -num_landmarks*2:]  # Assuming landmarks are concatenated to the end of the output tensor
-    
+    landmarks_predictions = outputs[:, :num_landmarks*2]  # Assuming landmarks are at the beginning of the output tensor
     # Reshape landmarks predictions
     landmarks_predictions = landmarks_predictions.view(-1, num_landmarks, 2)  # Reshape to match the format of the landmarks
-    
-    # Apply reverse transformation to convert the predicted landmarks back to real-world values
-    landmarks_predictions = reverse_transform_landmarks(landmarks_predictions, image.shape[0], image.shape[1])
-    
+    print(landmarks_predictions)
     return landmarks_predictions
 
 
@@ -71,14 +52,11 @@ def overlay_landmarks(image_path, landmarks):
     image = cv2.imread(image_path)
     # Convert image to RGB (OpenCV loads images in BGR format)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
     # Convert landmarks tensor to numpy array
     landmarks = landmarks.numpy()
-    
     # Scale the landmarks to match the image size
     image_height, image_width, _ = image.shape
     landmarks = landmarks * np.array([image_width, image_height])
-    
     # Draw landmarks on the image
     for landmark in landmarks:
         for point in landmark:
@@ -96,5 +74,4 @@ def overlay_landmarks(image_path, landmarks):
 # Example usage
 image_path = 'C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1/10406776_1.jpg'
 predicted_landmarks = predict_landmarks(image_path)
-# print(predicted_landmarks)
-overlay_landmarks(image_path, predicted_landmarks)
+# overlay_landmarks(image_path, predicted_landmarks)
