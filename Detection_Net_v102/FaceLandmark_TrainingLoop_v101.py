@@ -9,7 +9,7 @@ num_epochs = 10
 best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/facelandmark_model.pth'
 
 train_dataset = CustomDataset(IML_Helen.train_ordered_path, IML_Helen.train_ordered_annotation, IML_Helen.train_label, transform=train_transform)
-val_dataset = CustomDataset(IML_Helen.train_ordered_path, IML_Helen.train_ordered_annotation, IML_Helen.train_label, transform=val_transform)
+val_dataset = CustomDataset(IML_Helen.val_ordered_path, IML_Helen.val_ordered_annotation, IML_Helen.val_label, transform=val_transform)
 
 # Initialize the CNN model
 num_classes = 1

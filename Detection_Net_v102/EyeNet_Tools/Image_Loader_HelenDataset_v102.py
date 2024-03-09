@@ -64,10 +64,9 @@ train_ordered_path = []
 train_ordered_annotation = []
 train_label = []
 for i in range(len(train_matching_indices)):
-    # print(i)
     temp = [train_image_master_list[train_matching_indices[i][1]][train_matching_indices[i][2]]]
     temp_xy = annotations_master_file[train_matching_indices[i][0]][1],annotations_master_file[train_matching_indices[i][0]][2]
-    label=0
+    label=1
     train_ordered_path.append(temp)
     train_ordered_annotation.append(temp_xy)
     train_label.append(label)
@@ -77,10 +76,9 @@ val_ordered_path = []
 val_ordered_annotation = []
 val_label = []
 for i in range(len(val_matching_indices)):
-    # print(i)
     temp = [val_image_master_list[val_matching_indices[i][1]][val_matching_indices[i][2]]]
     temp_xy = annotations_master_file[val_matching_indices[i][0]][1],annotations_master_file[val_matching_indices[i][0]][2]
-    label=0
+    label=1
     val_ordered_path.append(temp)
     val_ordered_annotation.append(temp_xy)
     val_label.append(label)

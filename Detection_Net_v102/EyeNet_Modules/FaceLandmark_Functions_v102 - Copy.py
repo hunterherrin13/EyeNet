@@ -44,7 +44,6 @@ val_transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-
 class FacialLandmarkNet(nn.Module):
     def __init__(self, num_classes, num_landmarks):
         super(FacialLandmarkNet, self).__init__()
