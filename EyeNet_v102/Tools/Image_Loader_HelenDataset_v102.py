@@ -2,15 +2,14 @@ import os,glob
 import random
 import pandas as pd
 
-annotaion_path = 'C:/PROJECT_CODE/DETECTION_NET/Helen-Images/annotation'
-training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_train']
-validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_val']
-# training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_2','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_3','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_4']
-# validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test']
+annotaion_path = 'C:/PROJECT_CODE/EyeNet/Helen-Images/annotation'
+training_paths = ['C:/PROJECT_CODE/EyeNet/Helen-Images/test_train']
+validation_paths = ['C:/PROJECT_CODE/EyeNet/Helen-Images/test_val']
+# training_paths = ['C:/PROJECT_CODE/EyeNet/Helen-Images/train_1','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_2','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_3','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_4']
+# validation_paths = ['C:/PROJECT_CODE/EyeNet/Helen-Images/test']
 
 
 annotations = glob.glob(annotaion_path+'/*.txt')
-annotations[0]
 annotations_master_file = []
 for file in annotations:
     pd_file = pd.read_csv(file)

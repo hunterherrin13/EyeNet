@@ -1,11 +1,11 @@
 from datetime import datetime
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from EyeNet_Tools import Image_Loader_HelenDataset_v102 as IML_Helen
-from FaceLandmark_Functions_v102 import *
+from Tools import Image_Loader_HelenDataset_v102 as IML_Helen
+from FaceLandmark_Functions_v103 import *
 
 lr = 0.01
 num_epochs = 10
-best_model_path = 'C:/PROJECT_CODE/DETECTION_NET/Models/facelandmark_model.pth'
+best_model_path = 'C:/PROJECT_CODE/EyeNet/Models/facelandmark_model.pth'
 
 train_dataset = CustomDataset(IML_Helen.train_ordered_path, IML_Helen.train_ordered_annotation, IML_Helen.train_label, transform=train_transform)
 val_dataset = CustomDataset(IML_Helen.val_ordered_path, IML_Helen.val_ordered_annotation, IML_Helen.val_label, transform=val_transform)
@@ -109,4 +109,4 @@ def run_training():
 
     print('Training complete.')
 
-run_training()
+# run_training()
