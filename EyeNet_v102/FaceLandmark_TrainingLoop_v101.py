@@ -1,7 +1,6 @@
-
 from datetime import datetime
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from Detection_Net_Tools import Image_Loader_HelenDataset_v102 as IML_Helen
+from EyeNet_Tools import Image_Loader_HelenDataset_v102 as IML_Helen
 from FaceLandmark_Functions_v102 import *
 
 lr = 0.01
