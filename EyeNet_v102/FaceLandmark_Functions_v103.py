@@ -1,17 +1,17 @@
-import torch
+import torch,cv2
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-import cv2
+import torch.optim as optim
 import numpy as np
 from Net_Modules.Conv_Layers import conv,conv_110,conv_110_no_norm
 from Net_Modules import Transforms as TS
 
 class CustomDataset(Dataset):
-    def __init__(self, image_paths, landmarks, labels, transform=None):
+    def __init__(self, image_paths, landmarks, transform=None):
         self.image_paths = image_paths
         self.landmarks = landmarks
-        self.labels = labels
         self.transform = transform
+        # print(transform)
 
     def __len__(self):
         return len(self.image_paths)
@@ -21,14 +21,12 @@ class CustomDataset(Dataset):
         image = cv2.imread(img_path[0])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         landmark = self.landmarks[idx]
-        label = self.labels[idx]
-
+        # print(transform)
         if self.transform:
             image = self.transform(image)
-                # Convert landmark to tensor
+        # Convert landmark to tensor
         landmark_tensor = torch.tensor(landmark, dtype=torch.float)  # Assuming landmark is a list of coordinates
-
-        return image, landmark_tensor, label
+        return image, landmark_tensor
     
     
 # Define transformations for input images
@@ -41,13 +39,13 @@ val_transform = TS.im_transform()
 class ClassNet(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.align = conv(in_channels, out_channels, kernel_size=1, padding=0, bn=False)
+        self.align = conv(in_channels, out_channels, kernel_size=1, padding=0, batch_norm=False)
         self.trunk = nn.Sequential(
             conv_110_no_norm(out_channels, out_channels),
             conv_110_no_norm(out_channels, out_channels),
             conv_110_no_norm(out_channels, out_channels)
         )
-        self.conv = conv(out_channels, out_channels, bn=False)
+        self.conv = conv(out_channels, out_channels, batch_norm=False)
 
     def forward(self, x):
         x = self.align(x)
@@ -58,24 +56,24 @@ class InitialStage(nn.Module):
     def __init__(self, num_channels, num_landmarks, num_pafs):
         super().__init__()
         self.trunk = nn.Sequential(
-            conv(num_channels, num_channels, bn=False),
-            conv(num_channels, num_channels, bn=False),
-            conv(num_channels, num_channels, bn=False)
-        )
-        self.images = nn.Sequential(
-            conv(num_channels, 512, kernel_size=1, padding=0, bn=False),
-            conv(512, num_landmarks, kernel_size=1, padding=0, bn=False, relu=False)
+            conv(num_channels, num_channels, batch_norm=False),
+            conv(num_channels, num_channels, batch_norm=False),
+            conv(num_channels, num_channels, batch_norm=False)
         )
         self.landmarks = nn.Sequential(
-            conv(num_channels, 512, kernel_size=1, padding=0, bn=False),
-            conv(512, num_pafs, kernel_size=1, padding=0, bn=False, relu=False)
+            conv(num_channels, 512, kernel_size=1, padding=0, batch_norm=False),
+            conv(512, num_landmarks, kernel_size=1, padding=0, batch_norm=False, relu=False)
+        )
+        self.pafs = nn.Sequential(
+            conv(num_channels, 512, kernel_size=1, padding=0, batch_norm=False),
+            conv(512, num_pafs, kernel_size=1, padding=0, batch_norm=False, relu=False)
         )
 
     def forward(self, x):
         trunk_features = self.trunk(x)
-        images = self.images(trunk_features)
         landmarks = self.landmarks(trunk_features)
-        return [images, landmarks]
+        pafs = self.pafs(trunk_features)
+        return [landmarks, pafs]
 
 
 
@@ -99,15 +97,17 @@ class FacialLandmarkNet(nn.Module):
             conv_110(512, 512)   # conv5_5
         )
         # self.avgpool = nn.AdaptiveAvgPool2d((7, 7))  # Adaptive average pooling layer
-        self.landmarks = ClassNet(512(num_channels))
+        self.landmarks = ClassNet(512,num_channels)
         self.initial_stage = InitialStage(num_channels, num_landmarks, num_pafs)
 
     def forward(self, x):
-            face_features = self.features(x)
-            face_features = self.landmarks(face_features)
-
-            return face_features
-
-
+        # print("Input shape:", x.shape)
+        face_features = self.features(x)
+        # print("Features shape:", face_features.shape)
+        landmark_predictions = self.landmarks(face_features)
+        # print("Landmark predictions shape:", landmark_predictions.shape)
+        initial_stage_predictions,_ = self.initial_stage(landmark_predictions)
+        print(initial_stage_predictions.shape)
+        return initial_stage_predictions
 
 
