@@ -5,19 +5,9 @@ import pandas as pd
 annotaion_path = 'C:/PROJECT_CODE/DETECTION_NET/Helen-Images/annotation'
 training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_train']
 validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test_val']
-# training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1']
+# training_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_1','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_2','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_3','C:/PROJECT_CODE/DETECTION_NET/Helen-Images/train_4']
 # validation_paths = ['C:/PROJECT_CODE/DETECTION_NET/Helen-Images/test']
 
-def name_encoder(name_master_list):
-    # Flatten train_name_master_list
-    flattened_names = [name for sublist in name_master_list for name in sublist]
-    # Generate a mapping from original names to encoded integers
-    name_to_encoded = {name: i for i, name in enumerate(sorted(set(flattened_names)))}
-    # Encode the list of names while maintaining the structure of train_name_master_list
-    encoded_names = [[name_to_encoded[name] for name in sublist] for sublist in name_master_list]
-    # Generate a list of unique encoded names
-    unique_names = list(range(len(set(flattened_names))))
-    return unique_names,encoded_names
 
 annotations = glob.glob(annotaion_path+'/*.txt')
 annotations[0]
@@ -54,10 +44,6 @@ for path in validation_paths:
     val_image_master_list.append(val_image_path)
     val_name_master_list.append(val_names)
 
-training_unique_names,training_encoded_names = name_encoder(train_name_master_list)
-val_unique_names,val_encoded_names = name_encoder(val_name_master_list)
-
-
 
 train_matching_indices = []
 val_matching_indices = []
@@ -72,6 +58,8 @@ for i in range(len(annotations_master_file)):
                 val_matching_indices.append([i,j,k])
 
 
+
+
 train_ordered_path = []
 train_ordered_annotation = []
 train_label = []
@@ -83,3 +71,16 @@ for i in range(len(train_matching_indices)):
     train_ordered_path.append(temp)
     train_ordered_annotation.append(temp_xy)
     train_label.append(label)
+
+
+val_ordered_path = []
+val_ordered_annotation = []
+val_label = []
+for i in range(len(val_matching_indices)):
+    # print(i)
+    temp = [val_image_master_list[val_matching_indices[i][1]][val_matching_indices[i][2]]]
+    temp_xy = annotations_master_file[val_matching_indices[i][0]][1],annotations_master_file[val_matching_indices[i][0]][2]
+    label=0
+    val_ordered_path.append(temp)
+    val_ordered_annotation.append(temp_xy)
+    val_label.append(label)
